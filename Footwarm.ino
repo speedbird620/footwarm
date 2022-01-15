@@ -147,7 +147,7 @@ void loop() {
   }
   else {
     // Calculating the pulselength where the sole shall be energized
-    PulseLengthHigh = (PulseLength - ((PulseLength/StepWidth)* ShuntFactor));
+    PulseLengthHigh = (PulseLength - ((PulseLength/StepWidth)* (100-ShuntFactor)));
 
     // Calculating the pulselength where the sole shall be de-energized
     PulseLengthLow = (StepWidth * 5) - PulseLengthHigh;
