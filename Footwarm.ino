@@ -10,7 +10,7 @@
 */
 
 // Confugurable parameters for adjustment for each application
-int ShuntFactor = 100;   // To be set between 0 and 100%
+int ShuntFactor = 100;  // To be set between 0 and 100%
 int BatteryType = 1;    // 1 = 2S LiPo/LiIon, 2 = 3S LiPo/LiIon, 3 = 2S LiFePo4, 4 = 3S LiFePo4, 5 = 4S LiFePo4, 6 = Lead 12v
 int ButtonTime = 600;   // The time in ms for a button to be pressed before notching up/down
 
@@ -114,12 +114,12 @@ void loop() {
   while (not digitalRead(inPlus) and not digitalRead(inMinus)){
     LowVoltage = LOW;                                                           // Reset of low voltage inhibation
     BattVoltage = GetVoltage();                                                 // Measure the incoming voltage
-    digitalWrite(Led1, (BattVoltage < VoltThr1));                               // Light LED 1 if voltage is < 30%
-    digitalWrite(Led2, (BattVoltage >= VoltThr1 and BattVoltage < VoltThr2));   // Light LED 2 if voltage is 30% to 45%
-    digitalWrite(Led3, (BattVoltage >= VoltThr2 and BattVoltage < VoltThr3));   // Light LED 3 if voltage is 45% to 60%
-    digitalWrite(Led4, (BattVoltage >= VoltThr3 and BattVoltage < VoltThr4));   // Light LED 4 if voltage is 60% to 75%
-    digitalWrite(Led5, (BattVoltage >= VoltThr4 and BattVoltage < VoltThr5));   // Light LED 5 if voltage is 75% to 90%
-    digitalWrite(Led6, (BattVoltage >= VoltThr5));                              // Light LED 6 if voltage is > 90%
+    digitalWrite(Led6, (BattVoltage < VoltThr1));                               // Light LED 1 if voltage is < 30%
+    digitalWrite(Led5, (BattVoltage >= VoltThr1 and BattVoltage < VoltThr2));   // Light LED 2 if voltage is 30% to 45%
+    digitalWrite(Led4, (BattVoltage >= VoltThr2 and BattVoltage < VoltThr3));   // Light LED 3 if voltage is 45% to 60%
+    digitalWrite(Led3, (BattVoltage >= VoltThr3 and BattVoltage < VoltThr4));   // Light LED 4 if voltage is 60% to 75%
+    digitalWrite(Led2, (BattVoltage >= VoltThr4 and BattVoltage < VoltThr5));   // Light LED 5 if voltage is 75% to 90%
+    digitalWrite(Led1, (BattVoltage >= VoltThr5));                              // Light LED 6 if voltage is > 90%
   }
 
   // Cecking the incoming voltage
