@@ -17,16 +17,17 @@ int ButtonTime = 600;   // The time in ms for a button to be pressed before notc
 // Pls do not alter any of the values below
 
 // Defenition the I/O pin
+// Please note: pin mapping is set to be reversed in the compiler
 int PinOut = 1;     // To MOSFET, pin 3 @ATtiny841
 int inPlus = 8;     // Button notch up, pin 11 @ATtiny841
 int inMinus = 10;   // Button notch down, pin 13 @ATtiny841
 int voltIN = A1;    // Analog voltage battery in, pin 12 @ATtiny841
-int Led1 = 7;       // Pin 10 @ATtiny841, connected to LED 1
-int Led2 = 6;       // Pin 9 @ATtiny841, connected to LED 2
-int Led3 = 5;       // Pin 8 @ATtiny841, connected to LED 3
-int Led4 = 4;       // Pin 7 @ATtiny841, connected to LED 4
-int Led5 = 3;       // Pin 6 @ATtiny841, connected to LED 5
-int Led6 = 2;       // Pin 5 @ATtiny841, connected to LED 6
+int Led1 = 7;       // Pin 10 @ATtiny841, connected to LED 1 (green)
+int Led2 = 6;       // Pin 9 @ATtiny841, connected to LED 2 (green)
+int Led3 = 5;       // Pin 8 @ATtiny841, connected to LED 3 (green)
+int Led4 = 4;       // Pin 7 @ATtiny841, connected to LED 4 (orange)
+int Led5 = 3;       // Pin 6 @ATtiny841, connected to LED 5 (red)
+int Led6 = 2;       // Pin 5 @ATtiny841, connected to LED 6 (red)
 int Pin10 = 0;      // Pin 2 @ATtiny841, not connected but can be bused to indicate status when debugging
 
 // Parameters
@@ -110,8 +111,15 @@ float GetVoltage() {
 // the loop routine runs over and over again forever:
 void loop() {
 
+  // Cecking the incoming voltage
+  BattVoltage = GetVoltage();   // Measure the incoming voltage
+  if (BattVoltage < VoltThr1){  
+    // If the incoming voltage is below 30% the footwarmer shall inhibit operation in order to spare the battery from damage
+    LowVoltage = HIGH;
+  }
+
   // Both button are pressed at the same time, time to indicate the incoming voltage and reset the low voltage inhibation
-  while (not digitalRead(inPlus) and not digitalRead(inMinus)){
+  if (not digitalRead(inPlus) and not digitalRead(inMinus)){
     LowVoltage = LOW;                                                           // Reset of low voltage inhibation
     BattVoltage = GetVoltage();                                                 // Measure the incoming voltage
     digitalWrite(Led6, (BattVoltage < VoltThr1));                               // Light LED 1 if voltage is < 30%
@@ -121,28 +129,21 @@ void loop() {
     digitalWrite(Led2, (BattVoltage >= VoltThr4 and BattVoltage < VoltThr5));   // Light LED 5 if voltage is 75% to 90%
     digitalWrite(Led1, (BattVoltage >= VoltThr5));                              // Light LED 6 if voltage is > 90%
   }
-
-  // Cecking the incoming voltage
-  BattVoltage = GetVoltage();   // Measure the incoming voltage
-  if (BattVoltage < VoltThr1){  
-    // If the incoming voltage is below 30% the footwarmer shall inhibit operation in order to spare the battery from damage
-    LowVoltage = HIGH;
-  }
-
   // Inhibition of operation
-  if (LowVoltage) {
+  else if (LowVoltage) {
     // Shut down all of the LED
     digitalWrite(Led1, LOW);    
     digitalWrite(Led2, LOW); 
     digitalWrite(Led3, LOW); 
     digitalWrite(Led4, LOW); 
-    digitalWrite(Led5, LOW); 
-    digitalWrite(Led6, LOW); 
     // Shut down the output as well
     digitalWrite(PinOut, LOW); 
-    // Except the LED 1 what shall be blinking in order to indicate the detection of low voltage
+    // Except the LED 5 and 6 what shall be blinking in order to indicate the detection of low voltage
+    digitalWrite(Led5, HIGH); 
+    digitalWrite(Led6, LOW); 
     delay(100);
-    digitalWrite(Led1, HIGH); 
+    digitalWrite(Led5, LOW); 
+    digitalWrite(Led6, HIGH); 
     delay(100);
   }
   else {
@@ -167,6 +168,14 @@ void loop() {
       // Setting the ouput
       digitalWrite(PinOut, LOW); 
     }
+
+  // Lets indicate how much power is used to fry the soles 
+  digitalWrite(Led1, HIGH);                               // Just an indication that we got power to the footwarmer
+  digitalWrite(Led2, (PulseLength >= StepWidth));         // Frying the soles with 20%
+  digitalWrite(Led3, (PulseLength >= (StepWidth * 2)));   // Frying the soles with 40%
+  digitalWrite(Led4, (PulseLength >= (StepWidth * 3)));   // Frying the soles with 60%
+  digitalWrite(Led5, (PulseLength >= (StepWidth * 4)));   // Frying the soles with 80%
+  digitalWrite(Led6, (PulseLength >= (StepWidth * 5)));   // Frying the soles with 100%
   }    
 
   // The button for notch up is pressed
@@ -221,13 +230,5 @@ void loop() {
       // There you go. Now carry on!
       PulseLength = 0;
     }
-  }
-
-  // Finally, lets indicate how mych power used to fry the soles 
-  digitalWrite(Led1, HIGH);                               // Just an indication that we got power to the footwarmer
-  digitalWrite(Led2, (PulseLength >= StepWidth));         // Frying the soles with 20%
-  digitalWrite(Led3, (PulseLength >= (StepWidth * 2)));   // Frying the soles with 40%
-  digitalWrite(Led4, (PulseLength >= (StepWidth * 3)));   // Frying the soles with 60%
-  digitalWrite(Led5, (PulseLength >= (StepWidth * 4)));   // Frying the soles with 80%
-  digitalWrite(Led6, (PulseLength >= (StepWidth * 5)));   // Frying the soles with 100%
+  }  
 }
