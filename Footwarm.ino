@@ -7,6 +7,7 @@
   Revision
   0.1, first released version
   0.2, added watchdog function so if the program hasn´t reset the watchdog in 2 seconds, the microcontroller will perform a soft reset and the output will set to zero. #riskelimination
+  0.3, added inhibation of operation if a button is pressed during startup
   
   avionics@skyracer.net
 */
@@ -62,10 +63,23 @@ void setup() {
   pinMode(inPlus, INPUT);
   pinMode(inMinus, INPUT);
 
+  // A button is pressed during startup, inhibit the operation.    Added in 0.3
+  if (not digitalRead(inPlus) or not digitalRead(inMinus)){     // Added in 0.3
+    while (HIGH) {                                              // Added in 0.3
+      digitalWrite(PinOut, LOW);                                // Added in 0.3
+      digitalWrite(Led5, HIGH);                                 // Added in 0.3
+      digitalWrite(Led6, LOW);                                  // Added in 0.3
+      delay(50);                                                // Added in 0.3
+      digitalWrite(Led5, LOW);                                  // Added in 0.3
+      digitalWrite(Led6, HIGH);                                 // Added in 0.3
+      delay(200);                                               // Added in 0.3
+    }                                                           // Added in 0.3
+  }                                                             // Added in 0.3
+  
   // Applying voltage values for the different battery types.
   // Note, These figues does only apply on batteries at 25°C and the measurement is not precise. It shall only be used as an indication.
   if (BatteryType == 1) {   // 2S LiPo/LiIon
-    ShuntFactor = 100;      // Reducing the mas power to aprox 10W
+    ShuntFactor = 100;      // Reducing the max power to aprox 10W
     VoltThr1 = 7.53;        // 30%
     VoltThr2 = 7.63;        // 45%
     VoltThr3 = 7.75;        // 60%
@@ -73,7 +87,7 @@ void setup() {
     VoltThr5 = 8.22;        // 90%
   }
   if (BatteryType == 2) {   // 3S LiPo/LiIon
-    ShuntFactor = 45;       // Reducing the mas power to aprox 10W
+    ShuntFactor = 45;       // Reducing the max power to aprox 10W
     VoltThr1 = 11.3;        // 30%
     VoltThr2 = 11.45;       // 45%
     VoltThr3 = 11.62;       // 60%
@@ -81,7 +95,7 @@ void setup() {
     VoltThr5 = 12.33;       // 90%
   }
   if (BatteryType == 3) {   // 2S LiFePo4
-    ShuntFactor = 100;      // Reducing the mas power to aprox 10W
+    ShuntFactor = 100;      // Reducing the max power to aprox 10W
     VoltThr1 = 6.5;         // 30%
     VoltThr2 = 6.54;        // 45%
     VoltThr3 = 6.59;        // 60%
@@ -89,7 +103,7 @@ void setup() {
     VoltThr5 = 6.65;        // 90%
   }
   if (BatteryType == 4) {   // 3S LiPo/LiIon
-    ShuntFactor = 60;       // Reducing the mas power to aprox 10W
+    ShuntFactor = 60;       // Reducing the max power to aprox 10W
     VoltThr1 = 9.75;        // 30%
     VoltThr2 = 9.8;         // 45%
     VoltThr3 = 9.88;        // 60%
@@ -97,7 +111,7 @@ void setup() {
     VoltThr5 = 9.98;        // 90%
   }
   if (BatteryType == 5) {   // 4S LiFePo4
-    ShuntFactor = 33;       // Reducing the mas power to aprox 10W
+    ShuntFactor = 33;       // Reducing the max power to aprox 10W
     VoltThr1 = 13.00;       // 30%
     VoltThr2 = 13.07;       // 45%
     VoltThr3 = 13.17;       // 60%
@@ -105,7 +119,7 @@ void setup() {
     VoltThr5 = 13.3;        // 90%
   }
   if (BatteryType == 6) {   // 12v Lead acid
-    ShuntFactor = 38;       // Reducing the mas power to aprox 10W 
+    ShuntFactor = 38;       // Reducing the max power to aprox 10W 
     VoltThr1 = 11.75;       // 30%
     VoltThr2 = 11.98;       // 45%
     VoltThr3 = 12.2;        // 60%
