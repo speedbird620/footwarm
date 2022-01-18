@@ -4,14 +4,17 @@
   The source code: https://github.com/speedbird620/footwarm
   The webpage: https://skyracer.net/
 
-  Revision 0.1, first released version
+  Revision
+  0.1, first released version
+  0.2, added watchdog function so if the program hasn´t reset the watchdog in 2 seconds, the microcontroller will perform a soft reset and the output will set to zero. #riskelimination
   
   avionics@skyracer.net
 */
 
+#include <avr/wdt.h>
+
 // Confugurable parameters for adjustment for each application
-int ShuntFactor = 100;  // To be set between 0 and 100%
-int BatteryType = 1;    // 1 = 2S LiPo/LiIon, 2 = 3S LiPo/LiIon, 3 = 2S LiFePo4, 4 = 3S LiFePo4, 5 = 4S LiFePo4, 6 = Lead 12v
+int BatteryType = 6;    // 1 = 2S LiPo/LiIon, 2 = 3S LiPo/LiIon, 3 = 2S LiFePo4, 4 = 3S LiFePo4, 5 = 4S LiFePo4, 6 = Lead 12v
 int ButtonTime = 600;   // The time in ms for a button to be pressed before notching up/down
 
 // Pls do not alter any of the values below
@@ -40,9 +43,13 @@ int PulseLengthLow, PulseLengthHigh;  // Internal values for calculated pulsemod
 bool LowVoltage = LOW;                // If low voltage hade been detected, thie value is set and will interlock any output
 float BattVoltage;                    // The voltage of the incoming power.
 float VoltThr1, VoltThr2, VoltThr3, VoltThr4, VoltThr5;   // The voltage threshold for indication of the incoming voltage 
+int ShuntFactor = 0;                  // Used to shunt the power and keep the power output on a reasonable level. The power should not be more than about 5 watt per feet. The value is set depending on the type of battery.
 
 // The setup routine runs upon boot
 void setup() {
+  // Set up the watchdog      // Added in rev 0.2
+  wdt_enable(WDTO_2S);        // Added in rev 0.2
+  
   // initialize the input and output pins
   pinMode(PinOut, OUTPUT);
   pinMode(Led1, OUTPUT);
@@ -58,6 +65,7 @@ void setup() {
   // Applying voltage values for the different battery types.
   // Note, These figues does only apply on batteries at 25°C and the measurement is not precise. It shall only be used as an indication.
   if (BatteryType == 1) {   // 2S LiPo/LiIon
+    ShuntFactor = 100;      // Reducing the mas power to aprox 10W
     VoltThr1 = 7.53;        // 30%
     VoltThr2 = 7.63;        // 45%
     VoltThr3 = 7.75;        // 60%
@@ -65,6 +73,7 @@ void setup() {
     VoltThr5 = 8.22;        // 90%
   }
   if (BatteryType == 2) {   // 3S LiPo/LiIon
+    ShuntFactor = 45;       // Reducing the mas power to aprox 10W
     VoltThr1 = 11.3;        // 30%
     VoltThr2 = 11.45;       // 45%
     VoltThr3 = 11.62;       // 60%
@@ -72,6 +81,7 @@ void setup() {
     VoltThr5 = 12.33;       // 90%
   }
   if (BatteryType == 3) {   // 2S LiFePo4
+    ShuntFactor = 100;      // Reducing the mas power to aprox 10W
     VoltThr1 = 6.5;         // 30%
     VoltThr2 = 6.54;        // 45%
     VoltThr3 = 6.59;        // 60%
@@ -79,6 +89,7 @@ void setup() {
     VoltThr5 = 6.65;        // 90%
   }
   if (BatteryType == 4) {   // 3S LiPo/LiIon
+    ShuntFactor = 60;       // Reducing the mas power to aprox 10W
     VoltThr1 = 9.75;        // 30%
     VoltThr2 = 9.8;         // 45%
     VoltThr3 = 9.88;        // 60%
@@ -86,6 +97,7 @@ void setup() {
     VoltThr5 = 9.98;        // 90%
   }
   if (BatteryType == 5) {   // 4S LiFePo4
+    ShuntFactor = 33;       // Reducing the mas power to aprox 10W
     VoltThr1 = 13.00;       // 30%
     VoltThr2 = 13.07;       // 45%
     VoltThr3 = 13.17;       // 60%
@@ -93,6 +105,7 @@ void setup() {
     VoltThr5 = 13.3;        // 90%
   }
   if (BatteryType == 6) {   // 12v Lead acid
+    ShuntFactor = 38;       // Reducing the mas power to aprox 10W 
     VoltThr1 = 11.75;       // 30%
     VoltThr2 = 11.98;       // 45%
     VoltThr3 = 12.2;        // 60%
@@ -111,6 +124,9 @@ float GetVoltage() {
 // the loop routine runs over and over again forever:
 void loop() {
 
+  // Reseting the watchdog  // Added in rev 0.2
+  wdt_reset();              // Added in rev 0.2
+  
   // Cecking the incoming voltage
   BattVoltage = GetVoltage();   // Measure the incoming voltage
   if (BattVoltage < VoltThr1){  
@@ -169,7 +185,7 @@ void loop() {
       digitalWrite(PinOut, LOW); 
     }
 
-  // Lets indicate how much power is used to fry the soles 
+  // Lets indicate how much power is used to fry the poor soles. Lord have mercy!
   digitalWrite(Led1, HIGH);                               // Just an indication that we got power to the footwarmer
   digitalWrite(Led2, (PulseLength >= StepWidth));         // Frying the soles with 20%
   digitalWrite(Led3, (PulseLength >= (StepWidth * 2)));   // Frying the soles with 40%
