@@ -69,7 +69,7 @@
 // The standard pin configuration.
 #ifndef ARDUINO_HOODLOADER2
 
-  #define RESET     53
+  #define RESET     53      // Shall be 10 if Arduino Uno is used
   #define LED_HB    9
   #define LED_ERR   8
   #define LED_PMODE 7
@@ -81,9 +81,9 @@
 
   #ifdef USE_OLD_STYLE_WIRING
 
-    #define PIN_MOSI	51
-    #define PIN_MISO	50
-    #define PIN_SCK		52
+    #define PIN_MOSI	51    // Shall be 11 if Arduino Uno is used
+    #define PIN_MISO	50    // Shall be 12 if Arduino Uno is used
+    #define PIN_SCK		52    // Shall be 13 if Arduino Uno is used
 
   #endif
 
