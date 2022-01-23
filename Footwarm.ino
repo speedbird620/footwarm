@@ -8,6 +8,7 @@
   0.1, first released version
   0.2, added watchdog function so if the program hasn´t reset the watchdog in 2 seconds, the microcontroller will perform a soft reset and the output will set to zero. #riskelimination
   0.3, added inhibation of operation if a button is pressed during startup
+  0.4, added a separate threshold for low voltage
   
   avionics@skyracer.net
 */
@@ -43,7 +44,7 @@ unsigned long Sync = 0;               // Time of the last real time action
 int PulseLengthLow, PulseLengthHigh;  // Internal values for calculated pulsemodulation
 bool LowVoltage = LOW;                // If low voltage hade been detected, thie value is set and will interlock any output
 float BattVoltage;                    // The voltage of the incoming power.
-float VoltThr1, VoltThr2, VoltThr3, VoltThr4, VoltThr5;   // The voltage threshold for indication of the incoming voltage 
+float VoltThr0, VoltThr1, VoltThr2, VoltThr3, VoltThr4, VoltThr5;   // The voltage threshold for indication of the incoming voltage 
 int ShuntFactor = 0;                  // Used to shunt the power and keep the power output on a reasonable level. The power should not be more than about 5 watt per feet. The value is set depending on the type of battery.
 
 // The setup routine runs upon boot
@@ -80,6 +81,7 @@ void setup() {
   // Note, These figues does only apply on batteries at 25°C and the measurement is not precise. It shall only be used as an indication.
   if (BatteryType == 1) {   // 2S LiPo/LiIon
     ShuntFactor = 100;      // Reducing the max power to aprox 10W
+    VoltThr0 = 7.53;        // The threshold for low voltage    // Added in 0.4
     VoltThr1 = 7.53;        // 30%
     VoltThr2 = 7.63;        // 45%
     VoltThr3 = 7.75;        // 60%
@@ -88,6 +90,7 @@ void setup() {
   }
   if (BatteryType == 2) {   // 3S LiPo/LiIon
     ShuntFactor = 45;       // Reducing the max power to aprox 10W
+    VoltThr0 = 11.3;        // The threshold for low voltage    // Added in 0.4
     VoltThr1 = 11.3;        // 30%
     VoltThr2 = 11.45;       // 45%
     VoltThr3 = 11.62;       // 60%
@@ -96,6 +99,7 @@ void setup() {
   }
   if (BatteryType == 3) {   // 2S LiFePo4
     ShuntFactor = 100;      // Reducing the max power to aprox 10W
+    VoltThr0 = 6.5;         // The threshold for low voltage    // Added in 0.4
     VoltThr1 = 6.5;         // 30%
     VoltThr2 = 6.54;        // 45%
     VoltThr3 = 6.59;        // 60%
@@ -104,6 +108,7 @@ void setup() {
   }
   if (BatteryType == 4) {   // 3S LiPo/LiIon
     ShuntFactor = 60;       // Reducing the max power to aprox 10W
+    VoltThr0 = 9.75;        // The threshold for low voltage    // Added in 0.4
     VoltThr1 = 9.75;        // 30%
     VoltThr2 = 9.8;         // 45%
     VoltThr3 = 9.88;        // 60%
@@ -112,6 +117,7 @@ void setup() {
   }
   if (BatteryType == 5) {   // 4S LiFePo4
     ShuntFactor = 33;       // Reducing the max power to aprox 10W
+    VoltThr0 = 13.0;        // The threshold for low voltage    // Added in 0.4
     VoltThr1 = 13.00;       // 30%
     VoltThr2 = 13.07;       // 45%
     VoltThr3 = 13.17;       // 60%
@@ -120,6 +126,7 @@ void setup() {
   }
   if (BatteryType == 6) {   // 12v Lead acid
     ShuntFactor = 38;       // Reducing the max power to aprox 10W 
+    VoltThr0 = 10.0;        // The threshold for low voltage    // Added in 0.4
     VoltThr1 = 11.75;       // 30%
     VoltThr2 = 11.98;       // 45%
     VoltThr3 = 12.2;        // 60%
@@ -142,8 +149,9 @@ void loop() {
   wdt_reset();              // Added in rev 0.2
   
   // Cecking the incoming voltage
-  BattVoltage = GetVoltage();   // Measure the incoming voltage
-  if (BattVoltage < VoltThr1){  
+  BattVoltage = GetVoltage();       // Measure the incoming voltage
+  //if (BattVoltage < VoltThr1){    // Post version 0.4
+  if (BattVoltage < VoltThr0){      // Version 0.4
     // If the incoming voltage is below 30% the footwarmer shall inhibit operation in order to spare the battery from damage
     LowVoltage = HIGH;
   }
