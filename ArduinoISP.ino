@@ -83,7 +83,7 @@
 
     #define PIN_MOSI	51    // Shall be 11 if Arduino Uno is used
     #define PIN_MISO	50    // Shall be 12 if Arduino Uno is used
-    #define PIN_SCK		52    // Shall be 13 if Arduino Uno is used
+    #define PIN_SCK	  52    // Shall be 13 if Arduino Uno is used
 
   #endif
 
@@ -640,10 +640,10 @@ void read_signature() {
   SERIAL.print((char) STK_OK);
 }
 
-void set_PWR() {
-  pinMode(48, OUTPUT);
-  digitalWrite(48, HIGH);
-}
+void set_PWR() {              // Added by for powering the target
+  pinMode(48, OUTPUT);        // Added by for powering the target
+  digitalWrite(48, HIGH);     // Added by for powering the target
+}                             // Added by for powering the target
 
   
 //////////////////////////////////////////
@@ -653,7 +653,7 @@ void set_PWR() {
 ////////////////////////////////////
 ////////////////////////////////////
 void avrisp() {
-  set_PWR();
+  set_PWR();                  // Added by for powering the target
   uint8_t ch = getch();
   switch (ch) {
     case '0': // signon
