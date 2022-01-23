@@ -150,7 +150,7 @@ void loop() {
   
   // Cecking the incoming voltage
   BattVoltage = GetVoltage();       // Measure the incoming voltage
-  //if (BattVoltage < VoltThr1){    // Post version 0.4
+  //if (BattVoltage < VoltThr1){    // Pre version 0.4
   if (BattVoltage < VoltThr0){      // Version 0.4
     // If the incoming voltage is below 30% the footwarmer shall inhibit operation in order to spare the battery from damage
     LowVoltage = HIGH;
